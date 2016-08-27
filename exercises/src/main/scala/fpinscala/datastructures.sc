@@ -1,5 +1,9 @@
 object datastructures {
   val list = (for (i <- 0 to 10) yield i).toList
+  val list2 = (for (i <- 20 to 30) yield i).toList
+  val list3 = (for (i <- 40 to 50) yield i).toList
+
+  val list4 = (for (i <- 0 to 10) yield i.toDouble).toList
 
   // http://stackoverflow.com/a/9160068
   def time[R](block: => R): R = {
@@ -122,4 +126,93 @@ object datastructures {
     foldRight(l, List[B]())((a: A, bs: List[B]) => f(a) :: bs)
 
   time { map3(list)((x: Int) => x * x) }
+
+  import Numeric.Implicits._
+  def sum[A: Numeric](l: List[A]) =
+    foldLeft(l, implicitly[Numeric[A]].zero)(_+_)
+
+  time { sum(list) }
+
+  def foldLeft2[A,B](l: List[A], z: B)(f: (B, A) => B) =
+    foldRight(reverse(l), z)((a, b) => f(b, a))
+
+  time { foldLeft(list, "")((b, a) => s"$a.$b") }
+
+  time { foldLeft2(list, "")((b, a) => s"$a.$b") }
+
+
+  def flatten[A](ls: List[List[A]]) =
+    foldLeft(ls, Nil:List[A])((b, a) => b ++ a)
+
+  flatten (List(list, list2, list3))
+
+  map(list)(_+1)
+
+  map(list4)(_.toString)
+
+  def filter[A](as: List[A])(f: A => Boolean): List[A] =
+    foldRight(as, Nil:List[A])((a, b) => if (f(a)) a :: b else b)
+
+  time { filter(list)(a => a % 2 == 0) }
+
+  def flatMap[A,B](as: List[A])(f: A => List[B]): List[B] =
+    flatten(map(as)(f))
+
+  flatMap(List(1,2,3))(i => List(i,i))
+
+  def filter2[A](as: List[A])(f: A => Boolean): List[A] =
+    flatMap(as)(a => if (f(a)) List(a) else List())
+
+  time { filter2(list)(a => a % 2 == 0) }
+
+  def listAdd(xs: List[Int], ys: List[Int]): List[Int] = (xs, ys) match {
+    case (_, Nil) | (Nil, _)      => Nil
+    case (x :: xs_, y :: ys_)     => (x + y) :: listAdd(xs_, ys_)
+  }
+
+  time { listAdd(list, list2) }
+
+
+  def listAdd2(xs: List[Int], ys: List[Int]): List[Int] = {
+    @annotation.tailrec
+    def loop(xs: List[Int], ys: List[Int], zs: List[Int]): List[Int] = (xs, ys) match {
+      case (_, Nil) | (Nil, _)      => zs
+      case (x :: xs_, y :: ys_)     => loop(xs_, ys_, (x + y) :: zs)
+    }
+
+    reverse(loop(xs, ys, Nil))
+  }
+
+  time { listAdd2(list, list2) }
+
+  def zipWith[A,B,C](as: List[A], bs: List[B])(f: (A, B) => C): List[C] = {
+    @annotation.tailrec
+    def loop(as: List[A], bs: List[B], cs: List[C]): List[C] = (as, bs) match {
+      case (_, Nil) | (Nil, _)      => cs
+      case (a :: as_, b :: bs_)     => loop(as_, bs_, f(a, b) :: cs)
+    }
+
+    reverse(loop(as, bs, Nil))
+  }
+
+  def listAdd3(xs: List[Int], ys: List[Int]) =
+    zipWith(xs, ys)((x, y) => x + y)
+
+  time { listAdd3(list, list2) }
+
+  def hasSubsequence[A](sup: List[A], sub: List[A]): Boolean = {
+    @annotation.tailrec
+    def found(xs: List[A], ys: List[A]): Boolean = (xs, ys) match {
+      case (Nil, _)                         => false
+      case (x :: xs_, Nil)                  => true
+      case (x :: xs_, y :: ys_) if x == y   => found(xs_, ys_)
+      case (x :: xs_, y :: ys_) if x != y   => found(xs_, sub)
+    }
+
+    found(sup, sub)
+  }
+
+  time { hasSubsequence(list, List(1,2,3)) }
+  time { hasSubsequence(list, List(5,6,7)) }
+  time { hasSubsequence(list, List(5,6,7,9)) }
 }
