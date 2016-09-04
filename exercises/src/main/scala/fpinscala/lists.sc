@@ -1,4 +1,4 @@
-object datastructures {
+object lists {
   val list = (for (i <- 0 to 10) yield i).toList
   val list2 = (for (i <- 20 to 30) yield i).toList
   val list3 = (for (i <- 40 to 50) yield i).toList
