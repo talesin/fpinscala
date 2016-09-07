@@ -100,8 +100,8 @@ object tree {
 
   // Ex. 3.29
   def fold[A,B](t: Tree[A], z: B)(f: (B, A) => B)(g: (B,B) => B): B = t match {
-    case Empty()              => z
-    case Leaf(a)              => f(z, a)
+    case Empty()                        => z
+    case Leaf(a)                        => f(z, a)
     case Branch(l: Tree[A], r: Tree[A]) => g(fold(l, z)(f)(g), fold(r, z)(f)(g))
   }
 
