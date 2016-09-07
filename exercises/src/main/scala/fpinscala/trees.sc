@@ -108,7 +108,7 @@ object tree {
   time { fold(t1, 0)((b, a) => a + b)((l, r) => l + r) }
 
   def size3(t: Tree[_]): Int =
-    fold(t, 0)((b, _) => b + 1)(b => b)
+    fold(t, 0)((b, _) => b + 1)((b1, b2) => b1 + b2 + 1)
 
   time { size3(t1) }
   time { size3(t2) }
@@ -120,18 +120,51 @@ object tree {
   time { max3(t2) }
 
   def depth2(t: Tree[_]): Int =
-    fold(t, 0)((b, a) => b + 1)((l, r) => l.max(r))
+    fold(t, 0)((b, a) => b + 1)((l, r) => l.max(r) + 1)
 
   time { depth2(t1) }
   time { depth2(t2) }
 
   def fold2[A,B](t: Tree[A], z: B)(f: (B, A) => B)(g: (B,B) => B): B = {
-    def loop[A](ts: List[Tree[A]], acc: B) = ts match {
-      case Nil                                        => acc
-      case Empty() :: ts_                             => loop(ts_, acc)
-      case Leaf(x) :: ts_                             => loop(ts_, f(acc, x))
-      case Branch(l: Tree[Int], r: Tree[Int]) :: ts_  => loop(l :: r :: ts_, acc)
+    @annotation.tailrec
+    def loop(ts: List[(Tree[A], Option[B])], acc: B): B = ts match {
+      case Nil =>
+        acc
+
+      case (Branch(l: Tree[Int], r: Tree[Int]), None) :: ts_ =>
+        loop((l, Some (acc)) :: (r, Some(acc)) :: ts_, acc)
+
+      case (Branch(l: Tree[Int], r: Tree[Int]), Some (b)) :: ts_ =>
+        loop((l, Some (acc)) :: (r, Some(acc)) :: ts_, g(b, acc))
+
+      case (Leaf(a), _) :: ts_ =>
+        loop(ts_, f(acc, a))
+
+      case (Empty(), _) :: ts_ =>
+        loop(ts_, acc)
     }
+
+    loop((t, None) :: Nil, z)
   }
+
+  time { fold2(t1, 0)((b, a) => a + b)((l, r) => l + r) }
+
+  def size4(t: Tree[_]): Int =
+    fold2(t, 0)((b, _) => b + 1)((b1, b2) => b1 + b2 + 1)
+
+  time { size3(t1) }
+  time { size3(t2) }
+
+  def max4(t: Tree[Int]): Int =
+    fold2(t, Int.MinValue)((b, a) => a.max(b))((l, r) => l.max(r))
+
+  time { max3(t1) }
+  time { max3(t2) }
+
+  def depth3(t: Tree[_]): Int =
+    fold2(t, 0)((b, a) => b + 1)((l, r) => l.max(r) + 1)
+
+  time { depth2(t1) }
+  time { depth2(t2) }
 
 }
