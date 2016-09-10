@@ -50,7 +50,7 @@ object lists {
     @annotation.tailrec
     def loop(xs: List[A], ys: List[A]): List[A] = ys match {
       case Nil        => xs
-      case y :: ys    => loop(y :: xs, ys)
+      case y :: ys_    => loop(y :: xs, ys_)
     }
 
     loop(Nil, l)

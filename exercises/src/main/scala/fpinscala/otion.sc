@@ -6,24 +6,24 @@ object option {
 
   sealed trait Option[+A] {
     def map[B](f: A => B): Option[B] = this match {
-      case None     => None
-      case Some (a) => Some (f(a))
+      case None => None
+      case Some(a) => Some(f(a))
     }
 
     def getOrElse[B >: A](default: => B): B = this match {
-      case None     => default
-      case Some (x) => x
+      case None => default
+      case Some(x) => x
     }
 
     def flatMap[B](f: A => Option[B]): Option[B] =
-      this map f match {
-        case None     => None
-        case Some (x) => x
-      }
+      map (f) getOrElse None
 
-    def orElse[B >: A](ob: => Option[B]): Option[B] = sys.error("todo")
+    def orElse[B >: A](ob: => Option[B]): Option[B] =
+      map (x => Some (x)) getOrElse ob
 
-    def filter(f: A => Boolean): Option[A] = sys.error("todo")
+    def filter(f: A => Boolean): Option[A] =
+      flatMap(a => if (f(a)) Some (a) else None)
+      //if (map (f) getOrElse false) this else None
   }
 
   case class Some[+A](get: A) extends Option[A]
@@ -56,13 +56,17 @@ object option {
       if (xs.isEmpty) None
       else Some(xs.sum / xs.length)
 
-    def variance(xs: Seq[Double]): Option[Double] = sys.error("todo")
+    def variance(xs: Seq[Double]): Option[Double] =
+      mean (xs) flatMap (m => mean (xs map (x => math.pow(x - m, 2))))
 
-    def map2[A, B, C](a: Option[A], b: Option[B])(f: (A, B) => C): Option[C] = sys.error("todo")
+    def map2[A, B, C](a: Option[A], b: Option[B])(f: (A, B) => C): Option[C] =
+      a flatMap (x => b map (y => f(x, y)))
 
-    def sequence[A](a: List[Option[A]]): Option[List[A]] = sys.error("todo")
+    def sequence[A](a: List[Option[A]]): Option[List[A]] =
+      traverse(a)(identity)
 
-    def traverse[A, B](a: List[A])(f: A => Option[B]): Option[List[B]] = sys.error("todo")
+    def traverse[A, B](a: List[A])(f: A => Option[B]): Option[List[B]] =
+      a.foldRight[Option[List[B]]](Some (Nil))((x, acc) => map2 (f(x), acc)((x_, xs) => x_ :: xs))
   }
 
   None map (x => 1)
@@ -73,4 +77,29 @@ object option {
 
   Some ('a') getOrElse 'b'
 
+  None flatMap (x => Some (x))
+
+  Some ('a') flatMap (x => Some (x+1))
+
+  None orElse Some ('a')
+
+  Some ('x') orElse Some ('a')
+
+  Option.mean (Seq(1.1, 2.2, 3.3, 4.4, 5.5))
+
+  Option.variance (Seq(1.1, 2.2, 3.3, 4.4, 5.5))
+
+  Option.map2 (Some (1), Some (2))(_+_)
+
+  Option.map2[Int,Int,Int] (None, Some (2))(_+_)
+
+  Option.map2[Int,Int,Int] (Some (1), None)(_+_)
+
+  Option.sequence(List(Some(1), Some(2), Some(3)))
+
+  Option.sequence(List(Some(1), Some(2), None, Some(3)))
+
+  Option.traverse(List(1,2,3,4,5))(a => if (a < 6) Some (a) else None)
+
+  Option.traverse(List(1,2,3,4,5))(a => if (a < 4) Some (a) else None)
 }
