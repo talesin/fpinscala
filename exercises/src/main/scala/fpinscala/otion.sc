@@ -15,15 +15,24 @@ object option {
       case Some(x) => x
     }
 
-    def flatMap[B](f: A => Option[B]): Option[B] =
-      map (f) getOrElse None
+    def flatMap[B](f: A => Option[B]): Option[B] = this match {
+      //map(f) getOrElse None
+      case None     => None
+      case Some(a)  => f(a)
+    }
 
-    def orElse[B >: A](ob: => Option[B]): Option[B] =
-      map (x => Some (x)) getOrElse ob
+    def orElse[B >: A](ob: => Option[B]): Option[B] = this match {
+      //map (x => Some (x) ) getOrElse ob
+      case None     => ob
+      case Some(a)  => Some(a)
+    }
 
-    def filter(f: A => Boolean): Option[A] =
-      flatMap(a => if (f(a)) Some (a) else None)
+    def filter(f: A => Boolean): Option[A] = this match {
+      //flatMap (a => if (f (a) ) Some (a) else None)
       //if (map (f) getOrElse false) this else None
+      case Some(a) if f(a)  => Some(a)
+      case _                => None
+    }
   }
 
   case class Some[+A](get: A) extends Option[A]
