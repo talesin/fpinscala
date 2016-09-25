@@ -22,7 +22,7 @@ object lists {
   time { tail (list) }
 
   def setHead[A](l: List[A], h: A): List[A] =
-    h :: (tail(l))
+    h :: tail(l)
 
   time { setHead(list, 99) }
 
