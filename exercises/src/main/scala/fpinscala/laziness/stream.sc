@@ -42,4 +42,10 @@ object stream {
   numbers.take(20).filter(_ % 3 == 0).toList
 
   numbers.take(3).append(9).toList
+
+  numbers.take(10).drop(7).toList
+
+  numbers.take(3).join(numbers.take(10).drop(7)).toList
+
+  numbers.take(3).flatMap(x => numbers.take((x+1)*10).drop(x*10+7)).toList
 }

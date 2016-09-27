@@ -30,7 +30,7 @@ trait Stream[+A] {
 
 
   def drop(n: Int): Stream[A] = this match {
-    case Cons(h, t) if n < n => t().drop(n-1)
+    case Cons(h, t) if n > 0 => t().drop(n-1)
     case _ => this
   }
 
@@ -65,10 +65,13 @@ trait Stream[+A] {
     foldRight[Stream[A]](Empty)((a, as) => if (p(a)) Stream.cons(a, as) else as)
 
   def append[B >: A](b: => B): Stream[B] =
-    foldRight[Stream[B]](Stream.cons[B](b, Empty))((a, bs) => Stream.cons(a, bs))
+    foldRight[Stream[B]](Stream.cons[B](b, Empty))(Stream.cons(_, _))
 
-//  def flatMap[B](f: A => Stream[B]): Stream[B] =
-//    foldRight[Stream[B]](Empty)
+  def join[B >: A](bs: Stream[B]): Stream[B] =
+    foldRight[Stream[B]](bs)(Stream.cons(_, _))
+
+  def flatMap[B](f: A => Stream[B]): Stream[B] =
+    foldRight[Stream[B]](Empty)(f(_).join(_))
 
   def startsWith[B](s: Stream[B]): Boolean = sys.error("todo")
 }
