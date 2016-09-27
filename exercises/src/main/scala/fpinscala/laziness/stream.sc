@@ -48,4 +48,11 @@ object stream {
   numbers.take(3).join(numbers.take(10).drop(7)).toList
 
   numbers.take(3).flatMap(x => numbers.take((x+1)*10).drop(x*10+7)).toList
+
+  Stream.constant('a').take(5).toList
+
+  Stream.from(4).take(5).toList
+
+  Stream.fibs(1, 1).take(10).toList
+
 }
