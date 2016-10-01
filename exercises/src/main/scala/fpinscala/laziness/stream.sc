@@ -22,12 +22,17 @@ object stream {
     loop(0)
   }
 
+  numbers.take(10).toList
+
+  numbers.take2(10).toList
 
   numbers.takeWhile(_ <= 10).toList
 
-  numbers.forAll(_ < 10)
-
   numbers.takeWhile2(_ <= 10).toList
+
+  numbers.takeWhile3(_ <= 10).toList
+
+  numbers.forAll(_ < 10)
 
   numbers.headOption
 
@@ -38,6 +43,8 @@ object stream {
   empty.headOption2
 
   numbers.take(10).map(_ * 2).toList
+
+  numbers.take(10).map2(_ * 2).toList
 
   numbers.take(20).filter(_ % 3 == 0).toList
 
@@ -55,4 +62,29 @@ object stream {
 
   Stream.fibs(1, 1).take(10).toList
 
+  numbers.take(10).zipWith(numbers.take(12))(_+_).toList
+
+  numbers.take(10).zipAll(Stream.fibs(1,1).take(10)).toList
+
+  numbers.take(5).zipAll(Stream.fibs(1,1).take(10)).toList
+
+  numbers.take(10).zipAll(Stream.fibs(1,1).take(5)).toList
+
+  numbers.take(10).startsWith(numbers.take(3))
+
+  numbers.take(10).startsWith(numbers.drop(3).take(3))
+
+  numbers.take(2).startsWith(numbers.take(3))
+
+  numbers.take(10).tail.toList
+
+  numbers.take(5).tails.map(_.toList).toList
+
+  numbers.take(10).hasSubsequence(numbers.drop(3).take(4))
+
+  numbers.take(5).hasSubsequence(numbers.drop(3).take(4))
+
+  numbers.tail.take(3).scanRight(0)(_+_).toList
+
+  numbers.tail.take(5).scanRight(0)(_+_).toList
 }
